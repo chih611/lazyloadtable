@@ -23,18 +23,6 @@ const App = () => {
   // const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetch("https://microsoftedge.github.io/Demos/json-dummy-data/5MB.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
-        }
-        return response.json(); // must parse JSON
-      })
-      .then((data) => setData(data))
-      .catch((error) => console.error(error));
-  }, []);
-
   const columns: ColumnsType<Row> = [
     {
       title: "ID",
@@ -81,12 +69,19 @@ const App = () => {
   }, []);
 
   const fetchMoreData = () => {
-    if (data.length >= 10) {
-      // stop after 100 rows
+    if (data.length >= 50) {
       setHasMore(false);
       return;
     }
-    setData((prev) => [...prev, ...data]);
+    fetch("https://microsoftedge.github.io/Demos/json-dummy-data/5MB.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("HTTP error " + response.status);
+        }
+        return response.json(); // must parse JSON
+      })
+      .then((data) => setData((prev) => [...prev, ...data]))
+      .catch((error) => console.error(error));
   };
   return (
     <InfiniteScroll
