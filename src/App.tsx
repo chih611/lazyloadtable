@@ -6,7 +6,6 @@ import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-// -------------------- Types --------------------
 export interface Row {
   id: string;
   name: string;
@@ -15,13 +14,12 @@ export interface Row {
   version: number;
 }
 
-// -------------------- Component --------------------
 const App = () => {
   const [data, setData] = useState<Row[]>([]);
-  // const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [tableData, setTableData] = useState<Row[]>([]);
+
   const itemPerPage = 10;
 
   const columns: ColumnsType<Row> = [
@@ -29,8 +27,16 @@ const App = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      width: 180,
+      width: 200,
       render: (text) => <span style={{ fontWeight: 500 }}>{text}</span>,
+    },
+    {
+      title: "Bio",
+      dataIndex: "bio",
+      key: "bio",
+      ellipsis: true,
+      sorter: (a, b) => a.bio.length - b.bio.length,
+      sortDirections: ["descend"],
     },
     {
       title: "Name",
@@ -45,25 +51,14 @@ const App = () => {
       title: "Language",
       dataIndex: "language",
       key: "language",
-      width: 160,
-    },
-    {
-      title: "Bio",
-      dataIndex: "bio",
-      key: "bio",
-      ellipsis: true,
+      width: 200,
     },
     {
       title: "Version",
       dataIndex: "version",
       key: "version",
-      width: 140,
-      render: (val: number) => {
-        if (val > 5) return <Tag color="green">served</Tag>;
-        if (val > 2) return <Tag color="blue">to contact</Tag>;
-        if (val > 1) return <Tag color="orange">pause</Tag>;
-        return <Tag color="red">new customer</Tag>;
-      },
+      width: 200,
+      render: (val: number) => <Tag color="green">{val}</Tag>,
     },
   ];
 
@@ -85,10 +80,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchMoreData = () => {
     if (tableData.length >= data.length) {
       setHasMore(false);
@@ -98,19 +89,24 @@ const App = () => {
       tableData.length,
       tableData.length + itemPerPage
     );
-    console.log("-----", [...tableData, ...nextItems]);
     setTableData([...tableData, ...nextItems]);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <InfiniteScroll
       dataLength={tableData.length}
       next={fetchMoreData}
       hasMore={hasMore}
       loader={<h4>Loading...</h4>}
-      height={900} // scrollable height
+      height={600} // scrollable height
     >
       <h2 style={{ marginBottom: 16 }}>Table Editor</h2>
       <Table<Row>
+        rowSelection={{ type: "checkbox" }}
         dataSource={tableData}
         columns={columns}
         pagination={false}
