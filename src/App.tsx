@@ -1,10 +1,11 @@
-// AntDesignTableEditor.tsx
-// React 18+ (TypeScript)
-// Ant Design Table with styling similar to Airtable-like layout
+// // AntDesignTableEditor.tsx
+// // React 18+ (TypeScript)
+// // Ant Design Table with styling similar to Airtable-like layout
 
 import { useEffect, useState } from "react";
-import { Table, Tag, Button, Space } from "antd";
+import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 // -------------------- Types --------------------
 export interface Row {
@@ -16,8 +17,12 @@ export interface Row {
 }
 
 // -------------------- Component --------------------
-function App() {
+const App = () => {
   const [data, setData] = useState<Row[]>([]);
+  // const [page, setPage] = useState(1);
+  // const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     fetch("https://microsoftedge.github.io/Demos/json-dummy-data/5MB.json")
       .then((response) => {
@@ -69,45 +74,36 @@ function App() {
         return <Tag color="red">new customer</Tag>;
       },
     },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 180,
-      render: (_, record) => (
-        <Space>
-          <Button
-            size="small"
-            type="primary"
-            onClick={() => console.log("Edit", record)}
-          >
-            Edit
-          </Button>
-          <Button
-            size="small"
-            danger
-            onClick={() =>
-              setData((prev) => prev.filter((r) => r.id !== record.id))
-            }
-          >
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
   ];
 
+  useEffect(() => {
+    fetchMoreData();
+  }, []);
+
+  const fetchMoreData = () => {
+    if (data.length >= 10) {
+      // stop after 100 rows
+      setHasMore(false);
+      return;
+    }
+    setData((prev) => [...prev, ...data]);
+  };
   return (
-    <div style={{ padding: 24 }}>
+    <InfiniteScroll
+      dataLength={data.length}
+      next={fetchMoreData}
+      hasMore={hasMore}
+      loader={<h4>Loading...</h4>}
+      height={400} // scrollable height
+    >
       <h2 style={{ marginBottom: 16 }}>Table Editor</h2>
       <Table<Row>
-        columns={columns}
         dataSource={data}
+        columns={columns}
+        pagination={false}
         rowKey="id"
-        bordered
-        scroll={{ y: 400 }}
       />
-    </div>
+    </InfiniteScroll>
   );
-}
-
+};
 export default App;
