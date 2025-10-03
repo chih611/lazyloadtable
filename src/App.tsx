@@ -1,6 +1,3 @@
-// // React 18+ (TypeScript)
-// // Ant Design Table with styling similar to Airtable-like layout
-
 import { useEffect, useState } from "react";
 import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
