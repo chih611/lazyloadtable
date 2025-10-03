@@ -1,4 +1,3 @@
-// // AntDesignTableEditor.tsx
 // // React 18+ (TypeScript)
 // // Ant Design Table with styling similar to Airtable-like layout
 
@@ -20,8 +19,10 @@ export interface Row {
 const App = () => {
   const [data, setData] = useState<Row[]>([]);
   // const [page, setPage] = useState(1);
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [tableData, setTableData] = useState<Row[]>([]);
+  const itemPerPage = 10;
 
   const columns: ColumnsType<Row> = [
     {
@@ -37,6 +38,8 @@ const App = () => {
       key: "name",
       width: 200,
       render: (text) => <span style={{ fontWeight: 600 }}>{text}</span>,
+      sorter: (a, b) => a.name.length - b.name.length,
+      sortDirections: ["descend"],
     },
     {
       title: "Language",
@@ -64,39 +67,55 @@ const App = () => {
     },
   ];
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        "https://microsoftedge.github.io/Demos/json-dummy-data/5MB.json"
+      );
+      if (!response.ok) throw new Error("HTTP error " + response.status);
+
+      const data = await response.json();
+      setData(data);
+      setTableData(data.slice(0, itemPerPage));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchMoreData();
+    fetchData();
   }, []);
 
   const fetchMoreData = () => {
-    if (data.length >= 50) {
+    if (tableData.length >= data.length) {
       setHasMore(false);
       return;
     }
-    fetch("https://microsoftedge.github.io/Demos/json-dummy-data/5MB.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
-        }
-        return response.json(); // must parse JSON
-      })
-      .then((data) => setData((prev) => [...prev, ...data]))
-      .catch((error) => console.error(error));
+    const nextItems = data.slice(
+      tableData.length,
+      tableData.length + itemPerPage
+    );
+    console.log("-----", [...tableData, ...nextItems]);
+    setTableData([...tableData, ...nextItems]);
   };
   return (
     <InfiniteScroll
-      dataLength={data.length}
+      dataLength={tableData.length}
       next={fetchMoreData}
       hasMore={hasMore}
       loader={<h4>Loading...</h4>}
-      height={400} // scrollable height
+      height={900} // scrollable height
     >
       <h2 style={{ marginBottom: 16 }}>Table Editor</h2>
       <Table<Row>
-        dataSource={data}
+        dataSource={tableData}
         columns={columns}
         pagination={false}
-        rowKey="id"
+        rowKey={(record, index) => record.id + "-" + index}
+        loading={loading}
       />
     </InfiniteScroll>
   );
