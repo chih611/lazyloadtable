@@ -20,7 +20,7 @@ Host: http://localhost:5173/
 React + Vite |
 Vercel |
 Ant design |
-Typescript |
+Typescript
 
 # Deployment
 
