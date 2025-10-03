@@ -17,10 +17,10 @@ Host: http://localhost:5173/
 
 # What features does it have?
 
-React + Vite
-Vercel
-Ant design
-Typescript
+React + Vite |
+Vercel |
+Ant design |
+Typescript |
 
 # Deployment
 
